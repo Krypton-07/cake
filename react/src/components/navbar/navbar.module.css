@@ -1,0 +1,142 @@
+header {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    color: black;
+    position: relative;
+    padding: 15px 20px;
+    align-items: center;
+    background-color: #faf3f3;
+    justify-content: space-between;
+    border-bottom: 3px solid #ffcbcb;
+}
+
+header h1 {
+    font-size: 30px;
+    letter-spacing: 1.5px;
+}
+
+header h1::first-letter {
+    color: #FF7F8A;
+}
+
+header a {
+    font-weight: 900;
+    text-decoration: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navLinksHorizontal {
+    gap: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navLinksHorizontal a {
+    padding: 10px;
+    color: #333;
+    font-weight: 625;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background-color: transparent;
+}
+
+.navLinksHorizontal a:hover {
+    padding: 10px;
+    color: #ffffff;
+    background-color: #ff6347;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.faBars {
+    font-size: 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+.faBars:hover {
+    color: white;
+    padding: 7.5px 10px;
+    border-radius: 7.5px;
+    background-color: #ff6347;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.faTimes {
+    position: absolute;
+    top: 15px;
+    background-color: #333;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    right: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.faTimes:hover {
+    background-color: #ff6347;
+}
+
+.sideMenu {
+    top: 0;
+    right: 0;
+    width: 300px;
+    z-index: 100;
+    height: 100vh;
+    display: flex;
+    position: fixed;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-evenly;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sideMenu a {
+    letter-spacing: 1px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.sideMenuLinks {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-direction: column;
+}
+
+.sideMenuLinks a {
+    color: #fff;
+    font-size: 18px;
+}
+
+.sideMenuLinks a:hover {
+    padding: 10px;
+    color: #ffffff;
+    border-radius: 10px;
+    background-color: #ff6347;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sideMenuOff {
+    display: none;
+}
+
+.activeLink {
+    padding: 10px;
+    font-weight: 600;
+    border-radius: 15px;
+    background-color: black;
+    box-shadow: 0 2px 5px rgba(0, 125, 255, 10);
+}
+
+.logoutBtn {
+    padding: 10px;
+    border-radius: 15px;
+    background-color: #1a1a1a;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}

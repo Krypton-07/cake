@@ -1,0 +1,99 @@
+.signupContainer {
+    width: 90%;
+    display: flex;
+    padding: 30px;
+    max-width: 400px;
+    text-align: center;
+    border-radius: 20px;
+    flex-direction: column;
+    background-color: #fffbf8;
+    justify-content: space-evenly;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.signupContainer h1 {
+    font-size: 28px;
+    color: #ff6b6b;
+    font-family: 'Poppins', sans-serif;
+}
+
+.signupContainer p {
+    font-size: 16px;
+    color: #696969;
+    margin-bottom: 20px;
+}
+
+.hidden {
+    width: 100%;
+    height: 0px;
+    overflow: hidden;
+}
+
+.signupForm {
+    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.inputField {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid #ff9f9f;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    color: black;
+}
+
+.inputField:focus {
+    border-color: #ff5a5f;
+    outline: none;
+}
+
+.passField {
+    font-size: 16px;
+    border: 1px solid #ff9f9f;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+}
+
+.pass {
+    width: 100%;
+    border: none;
+}
+
+.faEye {
+    font-size: 18px;
+    color: black;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.faEyeSlash {
+    font-size: 18px;
+    color: black;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.signupBtn {
+    padding: 12px;
+    font-size: 18px;
+    color: white;
+    background-color: #ff6b6b;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.signupBtn:hover {
+    background-color: #ff8585;
+}

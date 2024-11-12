@@ -1,0 +1,54 @@
+/* Background and main container styling */
+.container {
+    text-align: center;
+    background-color: #FFF8E1;
+    /* Soft pastel yellow */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Pacifico', cursive;
+    color: #6D4C41;
+    /* Warm brown color */
+}
+
+/* Cake icon styling */
+.cakeImage {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+/* Main header styling */
+.header {
+    font-size: 5rem;
+    margin: 0.5rem 0;
+}
+
+/* Text styling */
+.text {
+    font-size: 1.5rem;
+    max-width: 500px;
+    margin: 0.5rem auto;
+    line-height: 1.6;
+}
+
+/* Link button styling */
+.link {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    color: #FF6F61;
+    text-decoration: none;
+    border: 2px solid #FF6F61;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    background-color: #FFF;
+    transition: all 0.3s ease;
+}
+
+/* Link button hover effect */
+.link:hover {
+    color: #FFF;
+    background-color: #FF6F61;
+    cursor: pointer;
+}
