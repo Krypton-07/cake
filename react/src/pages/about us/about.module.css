@@ -1,7 +1,6 @@
 /* Container styling */
 .aboutContainer {
     background-color: #fff4f8;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;

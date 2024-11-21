@@ -10,6 +10,7 @@ import Contact from './pages/contact/contact';
 import Navbar from './components/navbar/navbar';
 import { Routes, Route } from 'react-router-dom';
 import NotFound from './pages/404/404';
+import Orders from './pages/orders/orders';
 
 const App = () => {
 	return (
@@ -24,6 +25,7 @@ const App = () => {
 				<Route path="/card/order/:id" element={<Order />} />
 				<Route path="/about" element={<About />} />
 				<Route path="/cart/:id" element={<Cart />} />
+				<Route path="/orders/:id" element={<Orders />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>
 			<Footer />

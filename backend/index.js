@@ -14,6 +14,7 @@ import Otp from './models/otp.js';
 import User from './models/user.js';
 import Cart from './models/cart.js';
 import Cards from './models/cards.js';
+import Orders from './models/orders.js';
 
 dotenv.config();
 
@@ -121,7 +122,7 @@ app.post('/signin', async (req, res) => {
 		const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
 			expiresIn: '30d',
 		});
-		
+
 		res.cookie('token', token, {
 			httpOnly: true,
 			sameSite: 'strict',
@@ -207,9 +208,11 @@ app.delete('/deleteCard/:id', async (req, res) => {
 app.post('/placeOrder', async (req, res) => {
 	try {
 		const {
+			userId,
 			name,
 			img,
 			cakeName,
+			id,
 			email,
 			location,
 			phoneNumber,
@@ -224,29 +227,126 @@ app.post('/placeOrder', async (req, res) => {
 				.json({ message: 'Invalid phone number format' });
 		}
 
+		let newOrder = await Orders.findOne({ createdBy: userId });
+
+		if (!newOrder) {
+			newOrder = new Orders({
+				createdBy: userId,
+				ordersData: [
+					{
+						product_id: id,
+						quantity,
+						total,
+						orderedBy: name,
+						phoneNumber,
+					},
+				],
+			});
+		} else {
+			newOrder.ordersData.push({ product_id: id, quantity, total });
+		}
+
+		await newOrder.save();
+
 		const mailOptions = {
 			from: email,
 			to: process.env.EMAIL,
-			subject: `New Customer Order`,
+			subject: `New Customer Knocked`,
 			html: `
-                <body>
-                    <img src="${img}" style="width: 68.5333%; aspect-ratio: 13/10"/>
-                    <p>Customer Name: <strong style="text-decoration: underline;">${name}</strong></p>
-                    <p>Customer Email: <strong style="text-decoration: underline;">${email}</strong></p>
-                    <p>Ordered Item: <strong style="text-decoration: underline;">${cakeName}</strong></p>
-                    <p>Location: <strong style="text-decoration: underline;">${location}</strong></p>
-                    <p>Phone Number: <strong style="text-decoration: underline;">${phoneNumber}</strong></p>
-					<p>Quantity: <strong style="text-decoration: underline;">${quantity} ${cakeName}</strong></p>
-					<p>Total Cost: <strong style="text-decoration: underline;">${total} BDT</strong></p>
-                </body>`,
+    <body style="font-family: Arial, sans-serif; background-color: #fff9f2; padding: 20px; color: #333;">
+        <div style="max-width: 600px; margin: auto; border: 2px solid #f8d7da; border-radius: 10px; background: #fff;">
+            <div style="text-align: center; padding: 20px 0; background: #fbd5d5; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h1 style="font-size: 24px; color: #a83232;">🎂 New Cake Order 🎂</h1>
+            </div>
+            <div style="padding: 20px;">
+                <img src="${img}" alt="Cake Image" style="width: 100%; max-width: 400px; display: block; margin: 0 auto; border-radius: 10px; border: 1px solid #f3f3f3;"/>
+                <p style="font-size: 18px; text-align: center; margin: 10px 0; color: #d2691e;">${cakeName}</p>
+                <hr style="border: none; border-top: 1px dashed #f3c8c8; margin: 20px 0;">
+
+                <div style="font-size: 16px; line-height: 1.5;">
+                    <p><strong>Customer Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Phone Number:</strong> ${phoneNumber}</p>
+                    <p><strong>Location:</strong> ${location}</p>
+                    <p><strong>Quantity:</strong> ${quantity} x ${cakeName}</p>
+                    <p><strong>Total Cost:</strong> ${total} BDT</p>
+                </div>
+            </div>
+            <div style="text-align: center; padding: 10px 0; background: #fbd5d5; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; font-size: 14px; color: #555;">
+                <p>&copy; ${new Date().getFullYear()} Cake Delight. All rights reserved.</p>
+            </div>
+        </div>
+    </body>`,
 		};
 
 		const transporter = Transporter();
 		await transporter.sendMail(mailOptions);
 
-		res.status(200).json({ message: 'Order placed successfully' });
+		res.status(200).json({
+			message: 'Order placed successfully',
+			orderId: newOrder._id,
+		});
 	} catch (e) {
-		res.status(500).json({ message: 'Error placing order', error: e });
+		response;
+		console.error('Error placing order:', e);
+		res.status(500).json({
+			message: 'Error placing order',
+			error: e.message,
+		});
+	}
+});
+
+app.get('/orderData/:createdBy', async (req, res) => {
+	const { createdBy } = req.params;
+
+	if (!mongoose.Types.ObjectId.isValid(createdBy)) {
+		return res.status(400).json({ message: 'Invalid user ID format' });
+	}
+
+	try {
+		const orders = await Orders.find({ createdBy });
+		res.status(200).json({ orders });
+	} catch (e) {
+		console.error('Error fetching order data:', e);
+		res.status(500).json({
+			message: 'Error fetching order data',
+			error: e.message,
+		});
+	}
+});
+
+app.get('/orderData', async (req, res) => {
+	try {
+		const orders = await Orders.find({});
+
+		res.status(200).json({ orders });
+	} catch {
+		res.status(500).json({ message: 'Failed to load carts' });
+	}
+});
+
+app.patch('/set/order/status', async (req, res) => {
+	const { client, orderId, newStatus } = req.body;
+
+	if (
+		!mongoose.Types.ObjectId.isValid(client) ||
+		!mongoose.Types.ObjectId.isValid(orderId) ||
+		!['Processing', 'Shipped', 'Delivered'].includes(newStatus)
+	) {
+		return res.status(400).json({ message: 'Invalid input' });
+	}
+
+	try {
+		await Orders.findOneAndUpdate(
+			{ createdBy: client, 'ordersData.product_id': orderId },
+			{ $set: { 'ordersData.$.status': newStatus } },
+			{ new: true }
+		);
+
+		res.status(200).json({ message: 'Order status updated successfully' });
+	} catch (error) {
+		console.error('Error updating order status:', error);
+		res.status(500).json({ message: 'Failed to update order status' });
 	}
 });
 
@@ -267,62 +367,85 @@ app.post('/communicate', async (req, res) => {
 	}
 });
 
-// Express routes to add, get, and delete cart items
 app.post('/addCart', async (req, res) => {
 	const { user_id, product_id } = req.body;
 
 	try {
-		const cart = await Cart.findOne({ user_id, product_id });
-		if (cart) {
-			return res.status(409).json({ message: 'Already added' });
-		}
-
-		await Cart.create({ user_id, product_id });
-		res.status(200).json({ message: 'Product added to cart successfully' });
-	} catch (error) {
-		console.error('Error in /addCart route:', error);
-		res.status(500).json({ success: false, error: 'Server Error' });
-	}
-});
-
-app.get('/getCart/:userId', async (req, res) => {
-	const userId = req.params.id;
-
-	try {
-		const cart = await Cart.find({ user_id: userId });
+		let cart = await Cart.findOne({ createdBy: user_id });
 
 		if (!cart) {
-			return res
-				.status(404)
-				.json({ success: false, message: 'Cart not found' });
+			cart = new Cart({
+				createdBy: user_id,
+				cartProducts: [{ product_id }],
+			});
+		} else {
+			const existingProduct = cart.cartProducts.find(item => {
+				return item.product_id.toString() === product_id.toString();
+			});
+
+			if (existingProduct) {
+				return res.status(409).json({
+					message: 'Product already in cart',
+				});
+			} else {
+				cart.cartProducts.push({ product_id });
+			}
 		}
 
-		res.status(200).json({ success: true, cart });
+		await cart.save();
+		res.status(200).json({
+			message: 'Added to cart',
+		});
 	} catch (error) {
-		console.error('Error in /getCart route:', error);
-		res.status(500).json({ success: false, error: 'Server Error' });
+		console.error('Error adding to cart:', error);
+		res.status(500).json({ message: 'Failed to add to cart' });
 	}
 });
 
-app.delete('/deleteCart', async (req, res) => {
-	const { id, userId } = req.body;
+app.get('/getCart/:createdBy', async (req, res) => {
+	const { createdBy } = req.params;
 
 	try {
-		const deletedItem = await Cart.findOneAndDelete({
-			id,
-			userId,
-		});
+		const cart = await Cart.findOne({ createdBy });
 
-		if (!deletedItem) {
-			return res.status(404).json({ message: 'Item not found in cart' });
+		if (!cart) {
+			return res.status(200).json({ cartProducts: [] });
+		}
+
+		res.status(200).json(cart);
+	} catch (error) {
+		console.error('Error retrieving cart:', error);
+		res.status(500).json({ message: 'Failed to load cart' });
+	}
+});
+
+app.delete('/deleteCart/:createdBy/:product_id', async (req, res) => {
+	const { createdBy, product_id } = req.params;
+
+	if (!createdBy || !product_id) {
+		return res
+			.status(400)
+			.json({ message: 'Missing user_id or product_id' });
+	}
+
+	try {
+		const updatedCart = await Cart.findOneAndUpdate(
+			{ createdBy },
+			{ $pull: { cartProducts: { product_id } } },
+			{ new: true }
+		);
+
+		if (!updatedCart) {
+			return res.status(404).json({ message: 'Cart or item not found' });
 		}
 
 		res.status(200).json({
-			message: 'Product deleted from cart successfully',
+			message: 'Item removed from cart',
+			updatedCart,
 		});
 	} catch (error) {
 		console.error('Error deleting cart item:', error);
-		res.status(500).json({ message: 'Error deleting cart item' });
+		res.status(500).json({ message: 'Failed to delete cart item' });
 	}
 });
 

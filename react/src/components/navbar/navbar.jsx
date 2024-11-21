@@ -25,6 +25,13 @@ const Navbar = () => {
 	const AuthenticatedLinks = () => (
 		<>
 			<NavLink
+				to="/"
+				className={checkingIsActive}
+				onClick={() => setIsMenuActive(false)}
+			>
+				<i className="fas fa-home"></i>
+			</NavLink>
+			<NavLink
 				to={`/cart/${user._id}`}
 				className={({ isActive }) =>
 					isActive ? Styles.activeLink : null
@@ -33,7 +40,13 @@ const Navbar = () => {
 			>
 				Cart
 			</NavLink>
-
+			<NavLink
+				to={`/orders/${user?._id}`}
+				className={checkingIsActive}
+				onClick={() => setIsMenuActive(false)}
+			>
+				Orders
+			</NavLink>
 			<NavLink
 				to="/contact"
 				className={({ isActive }) =>
@@ -60,7 +73,7 @@ const Navbar = () => {
 				className={checkingIsActive}
 				onClick={() => setIsMenuActive(false)}
 			>
-				Home
+				<i className="fas fa-home"></i>
 			</NavLink>
 			<NavLink
 				to="/add"
@@ -68,6 +81,13 @@ const Navbar = () => {
 				onClick={() => setIsMenuActive(false)}
 			>
 				Add
+			</NavLink>
+			<NavLink
+				to={`/orders/${user?._id}`}
+				className={checkingIsActive}
+				onClick={() => setIsMenuActive(false)}
+			>
+				Orders
 			</NavLink>
 			<NavLink className={Styles.logoutBtn} onClick={handleLogOut} to="/">
 				Log out
@@ -77,6 +97,13 @@ const Navbar = () => {
 
 	const GuestLinks = () => (
 		<>
+			<NavLink
+				to="/"
+				className={checkingIsActive}
+				onClick={() => setIsMenuActive(false)}
+			>
+				<i className="fas fa-home"></i>
+			</NavLink>
 			<NavLink to="/signin" className={checkingIsActive}>
 				Sign In
 			</NavLink>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Styles from './add.module.css';
 import { UseContext } from '../../contexts/context';
 
@@ -7,8 +7,37 @@ const AddCard = () => {
 	const [description, setDescription] = useState('');
 	const [price, setPrice] = useState('');
 	const [image, setImage] = useState(null);
+	const [imagePreview, setImagePreview] = useState(null);
+	const [dragging, setDragging] = useState(false);
 
 	const { addCard } = UseContext();
+	const imgUpload = useRef();
+
+	const handleImageChange = e => {
+		const file = e.target.files[0];
+		handleFile(file);
+	};
+
+	const handleFile = file => {
+		setImage(file);
+		setImagePreview(URL.createObjectURL(file));
+	};
+
+	const handleDragOver = e => {
+		e.preventDefault();
+		setDragging(true);
+	};
+
+	const handleDragLeave = () => {
+		setDragging(false);
+	};
+
+	const handleDrop = e => {
+		e.preventDefault();
+		setDragging(false);
+		const file = e.dataTransfer.files[0];
+		handleFile(file);
+	};
 
 	const handleSubmit = async e => {
 		try {
@@ -83,16 +112,37 @@ const AddCard = () => {
 					</div>
 
 					<div className={Styles.addpageFormGroup}>
-						<label htmlFor="image" className={Styles.addpageLabel}>
+						<label className={Styles.addpageLabel}>
 							Upload Image :
 						</label>
-						<input
-							type="file"
-							id="image"
-							className={Styles.addpageInput}
-							onChange={e => setImage(e.target.files[0])}
-							accept="image/*"
-						/>
+						<div
+							className={`${Styles.uploadDropArea} ${
+								dragging ? Styles.dragging : ''
+							}`}
+							onDragOver={handleDragOver}
+							onDragLeave={handleDragLeave}
+							onDrop={handleDrop}
+							onClick={() => {
+								imgUpload.current.click();
+							}}
+						>
+							<span>Drag & Drop or Click to Upload Image</span>
+							{imagePreview && (
+								<img
+									src={imagePreview}
+									alt="Preview"
+									className={Styles.imagePreview}
+								/>
+							)}
+							<input
+								type="file"
+								id="image"
+								className={Styles.hiddenFileInput}
+								onChange={handleImageChange}
+								accept="image/*"
+								ref={imgUpload}
+							/>
+						</div>
 					</div>
 
 					<button type="submit" className={Styles.submitButton}>

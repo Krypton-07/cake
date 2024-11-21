@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import Style from './home.module.css';
 import cakeImage from '../../assets/cake.jpg';
 import { UseContext } from '../../contexts/context';
@@ -6,10 +5,6 @@ import Card from '../../components/card/card';
 
 const Home = () => {
 	const { cardsData } = UseContext();
-
-	useEffect(() => {
-		console.log(cardsData);
-	}, [cardsData]);
 
 	return (
 		<main>
@@ -22,7 +17,7 @@ const Home = () => {
 							key={index}
 							img={e.imageUrl}
 							name={e.name}
-							price={e.price}
+							price={e.price.toString()}
 							id={e._id}
 						/>
 					))}

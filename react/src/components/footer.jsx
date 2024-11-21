@@ -11,6 +11,7 @@ const Footer = () => {
 				backgroundColor: '#FFF3E6',
 				borderTop: '3px solid #FF805D',
 				fontSize: 'clamp(0.66em, 1.5vw, 1.2em)',
+				position: 'relative',
 			}}
 		>
 			<div>

@@ -20,9 +20,9 @@ const Cart = () => {
 			<section className={Style.cardsArea}>
 				<hr className={Style.hr} />
 				<div className={Style.cards}>
-					{cartCards?.map((e, index) => (
+					{cartCards?.map(e => (
 						<Card
-							key={index}
+							key={e._id}
 							img={e.imageUrl}
 							name={e.name}
 							price={e.price}
@@ -30,6 +30,7 @@ const Cart = () => {
 						/>
 					))}
 				</div>
+
 				<hr className={Style.hr} />
 			</section>
 		</main>

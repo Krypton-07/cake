@@ -1,20 +1,10 @@
 .mainContent {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #f3e5f5 0%, #ffe0b2 100%);
-    max-height: 100vh;
-    font-family: 'Poppins', sans-serif;
-}
-
-label {
-    text-align: left;
+    padding: 10px;
 }
 
 .addpageContent {
     width: 95%;
-    padding: 35px;
+    padding: 30px;
     max-width: 650px;
     background-color: #fff7f0;
     border-radius: 15px;
@@ -54,6 +44,7 @@ label {
     color: #795548;
     margin-bottom: 8px;
     font-weight: 600;
+    align-self: flex-start;
 }
 
 .addpageInput,
@@ -99,4 +90,46 @@ label {
 .addpageTextarea {
     height: 80px;
     resize: none;
+}
+
+.uploadDropArea {
+    border: 2px dashed #e0a07c;
+    padding: 30px;
+    border-radius: 15px;
+    background-color: #f8f3f0;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-align: center;
+    position: relative;
+}
+
+.uploadDropArea:hover {
+    background-color: #ffe6e6;
+}
+
+.uploadDropArea:active {
+    background-color: #ffd1d1;
+}
+
+.dragging {
+    background-color: #ffd9d9;
+    border-color: #ec407a;
+}
+
+.hiddenFileInput {
+    display: none;
+}
+
+.imagePreview {
+    width: 100%;
+    height: 100%;
+    max-width: 120px;
+    max-height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }

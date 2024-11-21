@@ -1,9 +1,18 @@
 import styles from './about.module.css';
 import { NavLink, useNavigate } from 'react-router-dom';
 import aboutImage from '../../assets/cake.jpg';
+import { useEffect } from 'react';
+import { UseContext } from '../../contexts/context';
 
 const About = () => {
 	const navigate = useNavigate();
+	const { isAuthenticated } = UseContext();
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			navigate('/');
+		}
+	}, [isAuthenticated, navigate]);
 
 	return (
 		<main>

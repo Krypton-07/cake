@@ -1,14 +1,15 @@
-/* eslint-disable react/prop-types */
 import Styles from './card.module.css';
 import { useState } from 'react';
 import { UseContext } from '../../contexts/context';
 import { useNavigate, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const Card = ({ img, name, price, id }) => {
 	const [isPopDelActive, setIsPopDelActive] = useState(false);
 	const [isImageLoading, setIsImageLoading] = useState(true);
 
-	const { user, deleteCard, addCart, deleteCartCard } = UseContext();
+	const { user, deleteCard, addCart, deleteCartCard, getCards, getCart } =
+		UseContext();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const isAdmin = user?.role === 'admin';
@@ -17,17 +18,16 @@ const Card = ({ img, name, price, id }) => {
 	const handleDelete = async () => {
 		try {
 			if (isInCartPage) {
-				await deleteCartCard(user?._id, id).then(() => {
-					window.location.reload();
-				});
+				await deleteCartCard(user?._id, id);
+				getCart();
 			} else if (isAdmin) {
-				await deleteCard(id).then(() => {
-					window.location.reload();
-				});
+				await deleteCard(id);
+				getCards();
 			}
 			setIsPopDelActive(false);
 		} catch (error) {
 			console.error('Error deleting card:', error);
+			alert('Something went wrong while deleting the card!');
 		}
 	};
 
@@ -39,16 +39,22 @@ const Card = ({ img, name, price, id }) => {
 		}
 	};
 
+	const buttonIconClass = isInCartPage ? 'fa-trash-alt' : 'fa-bookmark';
+
 	return (
 		<>
 			<div className={Styles.card}>
 				<img
 					src={img}
 					alt="Card Image"
+					className={
+						isImageLoading
+							? Styles.imageLoading
+							: Styles.imageLoaded
+					}
 					onClick={() => navigate(`/card/order/${id}`)}
 					onLoad={() => setIsImageLoading(false)}
 					onError={() => setIsImageLoading(false)}
-					style={{ display: isImageLoading ? 'none' : 'block' }}
 				/>
 				<div className={Styles.cardBody}>
 					<h1>{name}</h1>
@@ -70,17 +76,13 @@ const Card = ({ img, name, price, id }) => {
 						aria-label={isInCartPage ? 'Delete Card' : 'Bookmark'}
 						onClick={isInCartPage ? handleDelete : handleAddCart}
 					>
-						<i
-							className={`fas ${
-								isInCartPage ? 'fa-trash-alt' : 'fa-bookmark'
-							}`}
-						></i>
+						<i className={`fas ${buttonIconClass}`}></i>
 					</button>
 				)}
 			</div>
 
 			{isPopDelActive && (
-				<div className={Styles.popupOverlay}>
+				<div className={Styles.popupOverlay} aria-live="assertive">
 					<div className={Styles.popupContent}>
 						<img
 							src={img}
@@ -93,14 +95,16 @@ const Card = ({ img, name, price, id }) => {
 						</p>
 						<div className={Styles.popupButtons}>
 							<button
-								className="confirm-btn"
+								className={Styles.confirmBtn}
 								onClick={handleDelete}
+								aria-label="Confirm Deletion"
 							>
 								Yes, Delete
 							</button>
 							<button
-								className="cancel-btn"
+								className={Styles.cancelBtn}
 								onClick={() => setIsPopDelActive(false)}
+								aria-label="Cancel Deletion"
 							>
 								Cancel
 							</button>
@@ -110,6 +114,13 @@ const Card = ({ img, name, price, id }) => {
 			)}
 		</>
 	);
+};
+
+Card.propTypes = {
+	img: PropTypes.string.isRequired,
+	name: PropTypes.string.isRequired,
+	price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+	id: PropTypes.string.isRequired,
 };
 
 export default Card;

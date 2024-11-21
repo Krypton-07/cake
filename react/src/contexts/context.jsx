@@ -14,6 +14,7 @@ export const ContextProvider = ({ children }) => {
 	const [loading, setLoading] = useState(false);
 	const [cardsData, setCardsData] = useState([]);
 	const [cartCards, setCartCards] = useState([]);
+	const [orderData, setOrderData] = useState([]);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 	const navigate = useNavigate();
@@ -191,9 +192,11 @@ export const ContextProvider = ({ children }) => {
 	};
 
 	const placeOrder = async (
+		userId,
 		name,
 		img,
 		cakeName,
+		id,
 		email,
 		location,
 		phoneNumber,
@@ -215,9 +218,11 @@ export const ContextProvider = ({ children }) => {
 			}
 
 			const response = await axios.post(`${BASE_URL}/placeOrder`, {
+				userId,
 				name,
 				img,
 				cakeName,
+				id,
 				email,
 				location,
 				phoneNumber,
@@ -239,6 +244,108 @@ export const ContextProvider = ({ children }) => {
 		}
 	};
 
+	const getOrderData = async createdBy => {
+		try {
+			if (!createdBy) throw new Error('User ID is undefined');
+
+			const response = await axios.get(
+				`${BASE_URL}/orderData/${createdBy}`
+			);
+			if (response.status === 200) {
+				const orders = response.data.orders.map(order => ({
+					products:
+						order.ordersData?.reverse()?.map(item => ({
+							product_id: item.product_id,
+							quantity: item.quantity,
+							status: item.status,
+							total: item.total,
+						})) || [],
+				}));
+
+				setOrderData(orders);
+				console.log(orders);
+
+				return orders;
+			}
+		} catch (error) {
+			console.error(
+				'Error fetching order data:',
+				error.response?.data || error.message
+			);
+		}
+	};
+
+	const getOrderDataAdmin = async () => {
+		if (user?.role !== 'admin') {
+			console.warn('Access denied: User is not an admin');
+			return [];
+		}
+
+		try {
+			const response = await axios.get(`${BASE_URL}/orderData`);
+			if (response.status === 200) {
+				const orders = response.data.orders.reverse().map(order => ({
+					createdBy: order.createdBy,
+					products: order.ordersData?.reverse().map(item => ({
+						product_id: item.product_id,
+						quantity: item.quantity,
+						status: item.status,
+						total: item.total,
+						phoneNumber: item.phoneNumber,
+						orderedBy: item.orderedBy,
+					})),
+				}));
+
+				console.log("Admin's order", orders);
+				return orders;
+			}
+		} catch (error) {
+			console.error('Error fetching admin order data:', error);
+			toast.error(
+				error.response?.data?.message ||
+					'Failed to load admin order data'
+			);
+			return [];
+		}
+	};
+
+	const handleStatusChange = async (client, orderId, newStatus) => {
+		try {
+			if (!client || !orderId || !newStatus) {
+				toast.error('Invalid client, order ID, or status');
+				return;
+			}
+
+			setLoading(true);
+
+			console.log('Updating status for:', { client, orderId, newStatus });
+
+			const response = await axios.patch(`${BASE_URL}/set/order/status`, {
+				client,
+				orderId,
+				newStatus,
+			});
+
+			if (response.status === 200) {
+				toast.success('Order status updated!');
+				await getOrderData(client);
+				await getOrderDataAdmin();
+			} else {
+				toast.error('Failed to update order status');
+			}
+		} catch (error) {
+			console.error(
+				'Failed to update order status:',
+				error.response?.data || error.message
+			);
+			toast.error(
+				error.response?.data?.message || 'Failed to update status'
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const communicate = async (email, subject, msg) => {
 		try {
 			setLoading(true);
@@ -257,12 +364,12 @@ export const ContextProvider = ({ children }) => {
 		}
 	};
 
-	const addCart = async (user = user?.id, product_id) => {
+	const addCart = async (user_id = user?.id, product_id) => {
 		try {
 			setLoading(true);
 			await axios
 				.post(`${BASE_URL}/addCart`, {
-					user,
+					user_id,
 					product_id,
 				})
 				.then(e => {
@@ -270,38 +377,46 @@ export const ContextProvider = ({ children }) => {
 					if (e.status === 200) {
 						toast.success('Added to cart');
 					}
-					getCart();
+					getCart(user?.id);
 				});
 		} catch (e) {
 			setLoading(false);
-			toast.error('Failed to add to cart');
+			if (e.status === 409) {
+				toast.error('Product already in cart');
+			} else {
+				toast.error('Failed to add to cart');
+			}
 			console.error('Error in addCart:', e);
 		}
 	};
 
-	const getCart = async userId => {
+	const getCart = async (createdBy = user?._id) => {
 		try {
+			if (!createdBy) {
+				console.error('Error in getCart: createdBy is undefined');
+				toast.error(
+					'Unable to load cart data. User is not authenticated.'
+				);
+				setCartCards([]);
+				return;
+			}
+
 			setLoading(true);
+			await axios.get(`${BASE_URL}/getCart/${createdBy}`).then(e => {
+				setLoading(false);
 
-			const response = await axios.get(`${BASE_URL}/getCart/${userId}`);
-			setLoading(false);
-
-			if (response.status === 200) {
-				const cartItems = response.data.cart;
-
-				const matchedCards = cartItems
-					?.map(item => {
-						const matchingCard = cardsData.find(
-							card => card._id === item.product_id
+				const cartProducts = e.data.cartProducts || [];
+				const matchingCards = cartProducts
+					.map(x => {
+						const matchedCards = cardsData.find(
+							y => y._id.toString() === x.product_id
 						);
-						return matchingCard;
+						return matchedCards;
 					})
 					.filter(Boolean);
-				setCartCards(matchedCards || []);
-			} else {
-				setCartCards([]);
-				toast.error('Failed to load cart items');
-			}
+
+				setCartCards(matchingCards);
+			});
 		} catch (error) {
 			setLoading(false);
 			setCartCards([]);
@@ -310,24 +425,19 @@ export const ContextProvider = ({ children }) => {
 		}
 	};
 
-	const deleteCartCard = async (userId, id) => {
+	const deleteCartCard = async (createdBy, product_id) => {
 		try {
-			setLoading(true);
 			await axios
-				.delete(`${BASE_URL}/deleteCart`, {
-					id,
-					userId,
-				})
+				.delete(`${BASE_URL}/deleteCart/${createdBy}/${product_id}`)
 				.then(e => {
-					setLoading(false);
 					if (e.status === 200) {
 						toast.success('Cart item deleted successfully');
-						getCart();
+						getCart(user?.id);
 					}
 				});
-		} catch {
-			setLoading(false);
-			toast.error('Failed to delete from cart');
+		} catch (error) {
+			console.error('Error deleting cart item:', error);
+			toast.error('Failed to delete cart item');
 		}
 	};
 
@@ -344,15 +454,19 @@ export const ContextProvider = ({ children }) => {
 				cardsData,
 				deleteCard,
 				placeOrder,
+				getOrderData,
+				orderData,
 				communicate,
 				addCart,
 				getCart,
 				cartCards,
 				deleteCartCard,
+				getOrderDataAdmin,
+				handleStatusChange,
 			}}
 		>
 			{children}
-			<ToastContainer position="top-left" autoClose={1000} />F
+			<ToastContainer position="top-left" autoClose={1000} />
 			{loading ? (
 				<div className="loading-container">
 					<div className="loader"></div>

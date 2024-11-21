@@ -127,13 +127,39 @@
 
 .popupButtons {
     display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-evenly;
+    justify-content: space-between;
+    gap: 15px;
 }
 
-.popupButtons>* {
-    background-color: rgb(188, 2, 2);
+.confirmBtn,
+.cancelBtn {
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    font-family: 'Poppins', sans-serif;
     font-weight: bold;
+}
 
+.confirmBtn {
+    background: #2ecc71;
+    color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+.confirmBtn:hover {
+    transform: translateY(-5px);
+}
+
+.cancelBtn {
+    background: #e74c3c;
+    color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+.cancelBtn:hover {
+    transform: translateY(-5px);
 }
