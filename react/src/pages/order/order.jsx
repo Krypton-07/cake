@@ -58,6 +58,7 @@ const Order = () => {
 		setLocation('');
 		setPhoneNumber('');
 		setLoading(false);
+		setIsPopDelActive(false);
 	};
 
 	const handleOrderClick = () => {
